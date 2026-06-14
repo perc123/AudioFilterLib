@@ -1,0 +1,81 @@
+# Build directories
+build/
+cmake-build-*/
+dist/
+out/
+
+# IDE & Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.user
+*.cbp
+
+# CMake
+CMakeLists.txt.user
+CMakeUserPresets.json
+
+# Generated files
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+*.exe
+*.lib
+*.exp
+*.pdb
+*.ilk
+*.asm
+
+# Compiler outputs
+*.obj
+*.lai
+*.la
+*.a
+*.lo
+
+# Debug symbols
+*.dSYM/
+*.su
+*.gch
+*.pcm
+
+# Testing & Coverage
+test_results/
+*.gcda
+*.gcno
+coverage/
+
+# vcpkg
+vcpkg_installed/
+.vcpkg-root
+
+# Python / Jupyter
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+
+# Documentation
+docs/_build/
+docs/html/
+doxygen_*.log
+
+# Audio/Media files (optional, for examples)
+*.wav
+*.mp3
+*.flac
+
+# Misc
+.project
+.cproject
+*.orig
+*.bak
+*.tmp
