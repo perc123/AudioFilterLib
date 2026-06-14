@@ -1,0 +1,19 @@
+{
+  "name": "audiofilterlib",
+  "version": "0.1.0",
+  "description": "High-performance C++ audio filter library (IIR & FIR) for real-time DSP",
+  "homepage": "https://github.com/yourusername/AudioFilterLib",
+  "documentation": "https://github.com/yourusername/AudioFilterLib#readme",
+  "license": "MIT",
+  "dependencies": [
+    {
+      "name": "libsndfile",
+      "version>=": "1.0.31"
+    },
+    {
+      "name": "gtest",
+      "version>=": "1.11.0",
+      "platform": "!windows"
+    }
+  ]
+}
