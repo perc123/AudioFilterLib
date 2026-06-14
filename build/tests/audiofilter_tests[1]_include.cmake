@@ -1,5 +1,0 @@
-if(EXISTS "/Users/fanis/Documents/GitHub/AudioFilterLib/build/tests/audiofilter_tests[1]_tests.cmake")
-  include("/Users/fanis/Documents/GitHub/AudioFilterLib/build/tests/audiofilter_tests[1]_tests.cmake")
-else()
-  add_test(audiofilter_tests_NOT_BUILT audiofilter_tests_NOT_BUILT)
-endif()
