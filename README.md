@@ -36,7 +36,7 @@ vcpkg install libsndfile gtest
 
 ## Quick Start
 
-### Clone & Build
+### Clone & Build.
 
 ```bash
 git clone https://github.com/yourusername/AudioFilterLib.git
