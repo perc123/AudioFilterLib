@@ -5,8 +5,13 @@
 
 #include "wav_file.h"
 #include <sndfile.h>
+#include <cstring>
 #include <stdexcept>
 #include <sstream>
+
+namespace {
+inline SNDFILE* sf(void* handle) { return static_cast<SNDFILE*>(handle); }
+}
 
 namespace audiofilter {
 
@@ -32,7 +37,7 @@ WAVFile::WAVFile(const std::string& filename) : m_read_mode(true) {
     m_num_frames = sfInfo.frames;
 
     if (m_sample_rate == 0 || m_num_channels == 0) {
-        sf_close(m_file_handle);
+        sf_close(sf(m_file_handle));
         m_file_handle = nullptr;
         throw std::runtime_error("WAVFile: Invalid audio file (zero sample rate or channels)");
     }
@@ -69,7 +74,7 @@ WAVFile::~WAVFile() {
 
 void WAVFile::close() noexcept {
     if (m_file_handle != nullptr) {
-        sf_close(m_file_handle);
+        sf_close(sf(m_file_handle));
         m_file_handle = nullptr;
     }
 }
@@ -98,10 +103,10 @@ std::vector<float> WAVFile::readFrames(uint64_t num_frames) {
     std::vector<float> buffer(num_samples);
 
     // Read from libsndfile
-    sf_count_t frames_read = sf_readf_float(m_file_handle, buffer.data(), num_frames);
+    sf_count_t frames_read = sf_readf_float(sf(m_file_handle), buffer.data(), num_frames);
 
     if (frames_read < 0) {
-        throw std::runtime_error(std::string("WAVFile: Read error: ") + sf_strerror(m_file_handle));
+        throw std::runtime_error(std::string("WAVFile: Read error: ") + sf_strerror(sf(m_file_handle)));
     }
 
     // Trim buffer to actual frames read
@@ -133,10 +138,10 @@ std::vector<float> WAVFile::readAll() {
 void WAVFile::seekFrame(uint64_t frame_pos) {
     ensureOpen("seekFrame");
 
-    sf_count_t result = sf_seek(m_file_handle, frame_pos, SEEK_SET);
+    sf_count_t result = sf_seek(sf(m_file_handle), frame_pos, SEEK_SET);
 
     if (result < 0) {
-        throw std::runtime_error(std::string("WAVFile: Seek error: ") + sf_strerror(m_file_handle));
+        throw std::runtime_error(std::string("WAVFile: Seek error: ") + sf_strerror(sf(m_file_handle)));
     }
 }
 
@@ -145,7 +150,7 @@ uint64_t WAVFile::getCurrentFrame() const noexcept {
         return 0;
     }
 
-    sf_count_t pos = sf_seek(m_file_handle, 0, SEEK_CUR);
+    sf_count_t pos = sf_seek(sf(m_file_handle), 0, SEEK_CUR);
     return (pos < 0) ? 0 : static_cast<uint64_t>(pos);
 }
 
@@ -167,10 +172,10 @@ void WAVFile::writeFrames(const float* samples, uint64_t num_frames) {
     }
 
     // Write to libsndfile
-    sf_count_t frames_written = sf_writef_float(m_file_handle, samples, num_frames);
+    sf_count_t frames_written = sf_writef_float(sf(m_file_handle), samples, num_frames);
 
     if (frames_written < 0) {
-        throw std::runtime_error(std::string("WAVFile: Write error: ") + sf_strerror(m_file_handle));
+        throw std::runtime_error(std::string("WAVFile: Write error: ") + sf_strerror(sf(m_file_handle)));
     }
 
     if (frames_written < static_cast<sf_count_t>(num_frames)) {
