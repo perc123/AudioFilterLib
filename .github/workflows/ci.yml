@@ -1,0 +1,305 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    name: Build & Test (${{ matrix.os }}, ${{ matrix.compiler }})
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, macos-latest, windows-latest]
+        compiler: [gcc, clang]
+        exclude:
+          # Windows doesn't need gcc (uses MSVC by default)
+          - os: windows-latest
+            compiler: gcc
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up dependencies (Ubuntu)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            cmake \
+            libsndfile1-dev \
+            libgtest-dev
+
+      - name: Set up dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew install cmake libsndfile googletest
+
+      - name: Set up dependencies (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          choco install cmake
+          vcpkg install libsndfile:x64-windows gtest:x64-windows
+
+      - name: Create build directory
+        run: mkdir -p build
+
+      - name: Configure CMake (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: |
+          cd build
+          cmake -DCMAKE_BUILD_TYPE=Release \
+                -DENABLE_TESTS=ON \
+                -DENABLE_EXAMPLES=ON \
+                -DENABLE_SIMD=ON \
+                -DENABLE_LTO=ON \
+                ..
+
+      - name: Configure CMake (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          cd build
+          cmake -DCMAKE_BUILD_TYPE=Release `
+                -DENABLE_TESTS=ON `
+                -DENABLE_EXAMPLES=ON `
+                -DENABLE_SIMD=ON `
+                ..
+
+      - name: Build
+        run: |
+          cd build
+          cmake --build . --config Release -j $(nproc || echo 4)
+
+      - name: Run unit tests
+        run: |
+          cd build
+          ctest --verbose --output-on-failure
+
+      - name: Run benchmark (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: |
+          cd build
+          ./examples/benchmark
+
+      - name: Run example (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: |
+          cd build
+          ./examples/wav_filter_example --help
+
+  code-quality:
+    name: Code Quality Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            clang-format \
+            clang-tidy \
+            cmake \
+            libsndfile1-dev \
+            libgtest-dev
+
+      - name: Check code formatting
+        run: |
+          find include src examples tests -name "*.h" -o -name "*.cpp" | \
+          while read file; do
+            clang-format --style=file --output-replacements-xml "$file" | \
+            grep -q "<replacement " && \
+            echo "File $file needs formatting" && exit 1 || true
+          done
+
+      - name: Create build directory
+        run: mkdir -p build
+
+      - name: Configure CMake
+        run: |
+          cd build
+          cmake -DCMAKE_BUILD_TYPE=Debug \
+                -DENABLE_TESTS=ON \
+                -DENABLE_EXAMPLES=ON \
+                -DCMAKE_CXX_CLANG_TIDY=clang-tidy \
+                ..
+
+      - name: Run static analysis
+        run: |
+          cd build
+          cmake --build . 2>&1 | grep -i "warning:" || echo "No warnings found"
+
+  coverage:
+    name: Code Coverage
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            cmake \
+            libsndfile1-dev \
+            libgtest-dev \
+            gcovr
+
+      - name: Create build directory
+        run: mkdir -p build
+
+      - name: Configure CMake with coverage
+        run: |
+          cd build
+          cmake -DCMAKE_BUILD_TYPE=Debug \
+                -DENABLE_TESTS=ON \
+                -DCMAKE_CXX_FLAGS="--coverage" \
+                -DCMAKE_EXE_LINKER_FLAGS="--coverage" \
+                ..
+
+      - name: Build
+        run: |
+          cd build
+          cmake --build . -j $(nproc)
+
+      - name: Run tests
+        run: |
+          cd build
+          ctest --verbose
+
+      - name: Generate coverage report
+        run: |
+          cd build
+          gcovr --root .. \
+                --filter='.*/(src|include)/.*\.(cpp|h)$' \
+                --exclude='.*test.*' \
+                --print-summary \
+                --html coverage.html
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./build/coverage.html
+          flags: unittests
+          name: codecov-umbrella
+
+  documentation:
+    name: Build Documentation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Doxygen
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y doxygen graphviz
+
+      - name: Generate Doxygen
+        run: |
+          doxygen Doxyfile || echo "Doxygen warnings"
+
+      - name: Upload documentation
+        uses: actions/upload-artifact@v3
+        with:
+          name: documentation
+          path: docs/html/
+
+  performance-regression:
+    name: Performance Regression Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            cmake \
+            libsndfile1-dev \
+            libgtest-dev \
+            linux-tools-generic
+
+      - name: Create build directory
+        run: mkdir -p build
+
+      - name: Build with optimizations
+        run: |
+          cd build
+          cmake -DCMAKE_BUILD_TYPE=Release \
+                -DENABLE_SIMD=ON \
+                -DENABLE_LTO=ON \
+                ..
+          cmake --build . -j $(nproc)
+
+      - name: Run benchmark
+        run: |
+          cd build
+          ./examples/benchmark | tee benchmark_results.txt
+
+      - name: Compare with baseline
+        run: |
+          # Check that IIR 4th order is < 0.1 cycles/sample
+          grep "IIR 4th Order" build/benchmark_results.txt | \
+          awk '{print $NF}' | \
+          awk '$1 < 0.1 {print "PASS: Performance OK"; exit 0}
+               {print "FAIL: Performance regression"; exit 1}'
+
+      - name: Upload benchmark results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: benchmark-results
+          path: build/benchmark_results.txt
+
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: [build-and-test, code-quality, coverage]
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            See CHANGELOG.md for changes in this release.
+          draft: false
+          prerelease: false
+
+  notify:
+    name: Notification
+    runs-on: ubuntu-latest
+    needs: [build-and-test]
+    if: always()
+
+    steps:
+      - name: Determine status
+        id: status
+        run: |
+          if [ "${{ needs.build-and-test.result }}" == "success" ]; then
+            echo "status=✅ PASSED" >> $GITHUB_OUTPUT
+          else
+            echo "status=❌ FAILED" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Post status
+        run: echo "Build ${{ steps.status.outputs.status }}"
