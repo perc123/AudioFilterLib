@@ -1,5 +1,11 @@
 # AudioFilterLib
 
+[![Build Status](https://github.com/yourusername/AudioFilterLib/actions/workflows/ci.yml/badge.svg)](https://github.com/yourusername/AudioFilterLib/actions)
+[![codecov](https://codecov.io/gh/yourusername/AudioFilterLib/branch/main/graph/badge.svg)](https://codecov.io/gh/yourusername/AudioFilterLib)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![C++17](https://img.shields.io/badge/C%2B%2B-17-blue.svg)](https://isocpp.org/wiki/faq/cpp17-compat)
+
+High-performance C++ audio filter library for real-time DSP...
 A high-performance C++ library for real-time audio filtering with IIR (Butterworth, Chebyshev) and FIR (windowed sinc) filter implementations. Designed for embedded DSP, real-time audio applications, and educational exploration of digital signal processing.
 
 ## Features
