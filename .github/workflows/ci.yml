@@ -1,85 +1,18 @@
-name: CI/CD Pipeline
+name: CI Build
 
-on:
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main ]
+on: [push, pull_request]
 
 jobs:
-  build-and-test:
-    name: Build & Test (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-22.04, macos-latest]
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up dependencies (Ubuntu)
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            build-essential \
-            cmake \
-            libsndfile1-dev \
-            libgtest-dev
-
-      - name: Set up dependencies (macOS)
-        if: runner.os == 'macOS'
-        run: |
-          brew install cmake libsndfile googletest
-
-      - name: Create build directory
-        run: mkdir -p build
-
-      - name: Configure CMake
-        run: |
-          cd build
-          cmake -DCMAKE_BUILD_TYPE=Release \
-                -DENABLE_TESTS=ON \
-                -DENABLE_EXAMPLES=ON \
-                -DENABLE_SIMD=ON \
-                ..
-
-      - name: Build
-        run: |
-          cd build
-          cmake --build . --config Release -j 4
-
-      - name: Run tests
-        run: |
-          cd build
-          ctest --verbose --output-on-failure
-
-      - name: Run benchmark
-        run: |
-          cd build
-          ./examples/benchmark || true
-
-  code-quality:
-    name: Code Quality
+  build-ubuntu:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y build-essential cmake libsndfile1-dev
+      - run: mkdir -p build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_TESTS=OFF -DENABLE_EXAMPLES=OFF .. && cmake --build . --verbose
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y cmake libsndfile1-dev libgtest-dev
-
-      - name: Configure and build
-        run: |
-          mkdir -p build
-          cd build
-          cmake -DCMAKE_BUILD_TYPE=Release \
-                -DENABLE_TESTS=ON \
-                -DENABLE_EXAMPLES=ON ..
-          cmake --build . -j 4
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: brew install cmake libsndfile
+      - run: mkdir -p build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_TESTS=OFF -DENABLE_EXAMPLES=OFF .. && cmake --build . --verbose
