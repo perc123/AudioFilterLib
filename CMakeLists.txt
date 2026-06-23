@@ -54,9 +54,15 @@ if(CMAKE_BUILD_TYPE MATCHES Release)
 endif()
 
 # === Dependencies ===
+# Prefer a CMake package config (Homebrew, vcpkg) but fall back to pkg-config,
+# since distro packages (e.g. Debian/Ubuntu's libsndfile1-dev) only ship a .pc
+# file and no SndFileConfig.cmake.
 find_package(SndFile QUIET)
 if(NOT SndFile_FOUND)
-    message(WARNING "libsndfile not found - WAV file I/O disabled")
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(SNDFILE_PKG REQUIRED IMPORTED_TARGET sndfile)
+    add_library(SndFile::sndfile ALIAS PkgConfig::SNDFILE_PKG)
+    set(SndFile_FOUND TRUE)
 endif()
 
 # Find optional dependencies
