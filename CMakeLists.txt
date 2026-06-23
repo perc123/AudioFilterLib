@@ -54,7 +54,10 @@ if(CMAKE_BUILD_TYPE MATCHES Release)
 endif()
 
 # === Dependencies ===
-find_package(SndFile REQUIRED)
+find_package(SndFile QUIET)
+if(NOT SndFile_FOUND)
+    message(WARNING "libsndfile not found - WAV file I/O disabled")
+endif()
 
 # Find optional dependencies
 if(ENABLE_TESTS)
@@ -77,10 +80,12 @@ target_include_directories(audiofilter
         $<INSTALL_INTERFACE:include>
 )
 
-target_link_libraries(audiofilter
-    PUBLIC
-        SndFile::sndfile
-)
+if(SndFile_FOUND)
+    target_link_libraries(audiofilter
+        PUBLIC
+            SndFile::sndfile
+    )
+endif()
 
 # Platform-specific tweaks
 if(WIN32)
