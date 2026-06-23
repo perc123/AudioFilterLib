@@ -1,7 +1,7 @@
 # AudioFilterLib
 
-[![Build Status](https://github.com/yourusername/AudioFilterLib/actions/workflows/ci.yml/badge.svg)](https://github.com/yourusername/AudioFilterLib/actions)
-[![codecov](https://codecov.io/gh/yourusername/AudioFilterLib/branch/main/graph/badge.svg)](https://codecov.io/gh/yourusername/AudioFilterLib)
+[![Build Status](https://github.com/perc123/AudioFilterLib/actions/workflows/ci.yml/badge.svg)](https://github.com/perc123/AudioFilterLib/actions)
+[![codecov](https://codecov.io/gh/perc123/AudioFilterLib/branch/main/graph/badge.svg)](https://codecov.io/gh/perc123/AudioFilterLib)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![C++17](https://img.shields.io/badge/C%2B%2B-17-blue.svg)](https://isocpp.org/wiki/faq/cpp17-compat)
 
