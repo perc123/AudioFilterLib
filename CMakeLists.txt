@@ -68,6 +68,7 @@ add_library(audiofilter
     src/iir_designer.cpp
     src/fir_designer.cpp
     src/audio_buffer.cpp
+    src/wav_file.cpp
 )
 
 target_include_directories(audiofilter
