@@ -10,3 +10,14 @@ target_link_libraries(wav_filter_example
         audiofilter
         SndFile::sndfile
 )
+
+add_executable(benchmark
+    benchmark.cpp
+    ../src/wav_file.cpp
+)
+
+target_link_libraries(benchmark
+    PRIVATE
+        audiofilter
+        SndFile::sndfile
+)
