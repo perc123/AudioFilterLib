@@ -1,5 +1,6 @@
 # AudioFilterLib
 
+
 High-performance C++ audio filter library for real-time DSP...
 A high-performance C++ library for real-time audio filtering with IIR (Butterworth, Chebyshev) and FIR (windowed sinc) filter implementations. Designed for embedded DSP, real-time audio applications, and educational exploration of digital signal processing.
 
