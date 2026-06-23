@@ -1,30 +1,11 @@
-name: CI Build
+name: Build
 
 on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Install dependencies
-        run: |
-          if [ "$RUNNER_OS" = "Linux" ]; then
-            sudo apt-get update
-            sudo apt-get install -y build-essential cmake
-          else
-            brew install cmake
-          fi
-        shell: bash
-
-      - name: Configure & Build
-        run: |
-          mkdir build
-          cd build
-          cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_TESTS=OFF -DENABLE_EXAMPLES=OFF ..
-          cmake --build .
+      - run: sudo apt-get update && sudo apt-get install -y cmake
+      - run: mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_TESTS=OFF -DENABLE_EXAMPLES=OFF .. && cmake --build .
