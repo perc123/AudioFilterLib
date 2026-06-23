@@ -84,19 +84,7 @@ void AudioBuffer::write(const float* samples, size_t num_frames) {
 }
 
 size_t AudioBuffer::availableWrite() const noexcept {
-    size_t write_pos = m_write_index.load(std::memory_order_acquire);
-    size_t read_pos = m_read_index.load(std::memory_order_acquire);
-
-    // Available = capacity - (write_pos - read_pos)
-    size_t unread = (write_pos - read_pos) & m_capacity_mask;
-    if (write_pos >= read_pos) {
-        unread = write_pos - read_pos;
-    } else {
-        // Wrapped around
-        unread = (m_capacity - read_pos) + write_pos;
-    }
-
-    return m_capacity - unread;
+    return m_capacity - availableRead();
 }
 
 // ===== Read Operations =====
@@ -160,16 +148,12 @@ void AudioBuffer::read(float* output, size_t num_frames) {
 }
 
 size_t AudioBuffer::availableRead() const noexcept {
-    size_t write_pos = m_write_index.load(std::memory_order_acquire);
-    size_t read_pos = m_read_index.load(std::memory_order_acquire);
-
-    // Available = (write_pos - read_pos) mod capacity
-    if (write_pos >= read_pos) {
-        return (write_pos - read_pos) / m_num_channels;
-    } else {
-        // Wrapped around
-        return ((m_capacity - read_pos) + write_pos) / m_num_channels;
-    }
+    // Use monotonic totals rather than wrapped indices: when write_pos
+    // wraps back around to equal read_pos, index-based math can't tell
+    // an empty buffer from a full one.
+    uint64_t written = m_total_written.load(std::memory_order_acquire);
+    uint64_t read = m_total_read.load(std::memory_order_acquire);
+    return static_cast<size_t>(written - read);
 }
 
 std::vector<float> AudioBuffer::peek(size_t num_frames) const {

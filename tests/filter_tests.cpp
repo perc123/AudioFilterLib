@@ -272,7 +272,7 @@ TEST_F(FIRDesignerTest, FIRProcessing) {
     EXPECT_TRUE(std::isfinite(output));
 
     // Output should be approximately first tap
-    EXPECT_NEAR(output, taps[taps.size() / 2], 0.1f);
+    EXPECT_NEAR(output, taps[0], 0.1f);
 }
 
 // ===== AudioBuffer Tests =====
@@ -319,12 +319,14 @@ TEST_F(AudioBufferTest, FrameWriteRead) {
 TEST_F(AudioBufferTest, Wraparound) {
     AudioBuffer buffer(SAMPLE_RATE, 1, 4);  // Small capacity for testing
 
-    // Write and read multiple times to trigger wraparound
+    // Interleave write/read so indices cycle past capacity multiple times
+    std::vector<float> samples;
     for (int i = 0; i < 10; ++i) {
-        buffer.write(&((float[]){0.5f})[0], 1);
+        float sample = 0.5f;
+        buffer.write(&sample, 1);
+        samples.push_back(buffer.read(1)[0]);
     }
 
-    auto samples = buffer.read(10);
     EXPECT_EQ(samples.size(), 10);
 
     for (float s : samples) {
@@ -343,7 +345,8 @@ TEST_F(AudioBufferTest, FillPercentage) {
     }
 
     float fill = buffer.getFillPercentage();
-    EXPECT_NEAR(fill, 50.0f, 1.0f);
+    float expected = 100.0f * 50 / buffer.getCapacity();
+    EXPECT_NEAR(fill, expected, 1.0f);
 }
 
 TEST_F(AudioBufferTest, Statistics) {

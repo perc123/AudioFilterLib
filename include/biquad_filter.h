@@ -210,7 +210,7 @@ public:
      * @return true if sample rate has been set, false otherwise
      */
     bool isConfigured() const noexcept override {
-        return m_sample_rate > 0;
+        return m_configured;
     }
 
     /**

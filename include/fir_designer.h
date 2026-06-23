@@ -160,7 +160,7 @@ public:
     }
 
     bool isConfigured() const noexcept override {
-        return m_sample_rate > 0;
+        return m_configured;
     }
 
     const char* getName() const noexcept override {
