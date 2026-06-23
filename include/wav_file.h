@@ -13,6 +13,10 @@
  * Hides libsndfile complexity behind a clean API.
  */
 
+// Forward declaration matching libsndfile's own typedef (sndfile.h),
+// so this header doesn't need to include sndfile.h directly.
+typedef struct sf_private_tag SNDFILE;
+
 namespace audiofilter {
 
 /**
@@ -213,8 +217,8 @@ public:
     void close() noexcept;
 
 private:
-    // libsndfile opaque handle
-    void* m_file_handle = nullptr;
+    // libsndfile file handle
+    SNDFILE* m_file_handle = nullptr;
 
     // File metadata
     uint32_t m_sample_rate = 0;
