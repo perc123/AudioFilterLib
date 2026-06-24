@@ -44,7 +44,7 @@ vcpkg install libsndfile gtest
 ### Clone & Build
 
 ```bash
-git clone https://github.com/yourusername/AudioFilterLib.git
+git clone https://github.com/perc123/AudioFilterLib.git
 cd AudioFilterLib
 mkdir build && cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
@@ -287,15 +287,15 @@ Target: **< 1 microsecond per sample** at 48 kHz sample rate
 
 ## Roadmap
 
-- [ ] **Phase 1**: Environment & project setup (this deliverable)
-- [ ] **Phase 2**: DSP math & filter abstractions
-- [ ] **Phase 3**: IIR filter design (Butterworth, Chebyshev)
-- [ ] **Phase 4**: FIR filter design (windowed sinc)
-- [ ] **Phase 5**: Real-time audio buffer management
-- [ ] **Phase 6**: WAV file I/O & examples
-- [ ] **Phase 7**: Unit tests & frequency response validation
-- [ ] **Phase 8**: Performance profiling & SIMD optimization
-- [ ] **Phase 9**: Documentation finalization & CI/CD
+- [√] **Phase 1**: Environment & project setup (this deliverable)
+- [√] **Phase 2**: DSP math & filter abstractions
+- [√] **Phase 3**: IIR filter design (Butterworth, Chebyshev)
+- [√] **Phase 4**: FIR filter design (windowed sinc)
+- [√] **Phase 5**: Real-time audio buffer management
+- [√] **Phase 6**: WAV file I/O & examples
+- [√] **Phase 7**: Unit tests & frequency response validation
+- [√] **Phase 8**: Performance profiling & SIMD optimization
+- [√] **Phase 9**: Documentation finalization & CI/CD
 
 ## Contributing
 
