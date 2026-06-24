@@ -285,17 +285,26 @@ Target: **< 1 microsecond per sample** at 48 kHz sample rate
 
 **Note**: SIMD (SSE/AVX) optimizations can provide 2-4x speedup on multi-channel processing.
 
-## Roadmap
+## Status
 
-- [√] **Phase 1**: Environment & project setup (this deliverable)
-- [√] **Phase 2**: DSP math & filter abstractions
-- [√] **Phase 3**: IIR filter design (Butterworth, Chebyshev)
-- [√] **Phase 4**: FIR filter design (windowed sinc)
-- [√] **Phase 5**: Real-time audio buffer management
-- [√] **Phase 6**: WAV file I/O & examples
-- [√] **Phase 7**: Unit tests & frequency response validation
-- [√] **Phase 8**: Performance profiling & SIMD optimization
-- [√] **Phase 9**: Documentation finalization & CI/CD
+This is a shipped, working library. All foundation phases are complete:
+
+- ✅ Project setup, build system (CMake + vcpkg)
+- ✅ DSP math and filter abstractions (`FilterBase`)
+- ✅ IIR filter design — Butterworth and Chebyshev Type I (`IIRDesigner`)
+- ✅ FIR filter design — windowed sinc with Hamming / Blackman / Kaiser (`FIRDesigner`)
+- ✅ Real-time multi-channel audio buffer (`AudioBuffer`)
+- ✅ WAV file I/O and example CLI (`examples/wav_filter_example`)
+- ✅ Unit tests — coefficient verification, frequency response, stability, cascade, impulse response
+- ✅ Performance profiling and SIMD-optimized biquad processing
+- ✅ Doxygen API documentation, CI via GitHub Actions, codecov coverage
+
+## Future work
+
+- Elliptic and directly-designed Butterworth bandpass filters
+- AVX-512 SIMD implementations
+- GPU filtering (CUDA / HIP) for offline batch processing
+- Adaptive filter implementations (LMS, RLS)
 
 ## Contributing
 
@@ -328,8 +337,8 @@ MIT License — see `LICENSE` file
 
 ## Author
 
-Created as a deep-dive into C++ digital signal processing. Learn by implementing from first principles.
-
+**Fanis Gioles** — Berlin
+[fanisgioles.com](https://www.fanisgioles.com) · [LinkedIn](https://linkedin.com/in/fanis-gioles) · fanis.gioles@gmail.com
 ---
 
 **Questions or feedback?** Open an issue on GitHub or contact the maintainer.
