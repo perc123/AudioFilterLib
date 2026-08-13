@@ -37,7 +37,7 @@ AudioFilterLibAudioProcessorEditor::AudioFilterLibAudioProcessorEditor(AudioFilt
     addAndMakeVisible(filterTypeBox);
     setUpLabel(filterTypeLabel, *this);
     filterTypeAttachment = std::make_unique<ComboAttachment>(
-        processor.apvts, AudioFilterLibAudioProcessor::filterTypeParamId, filterTypeBox);
+        audioProcessor.apvts, AudioFilterLibAudioProcessor::filterTypeParamId, filterTypeBox);
     filterTypeBox.onChange = [this] { updateEnablement(); };
 
     // --- Design method ---
@@ -45,7 +45,7 @@ AudioFilterLibAudioProcessorEditor::AudioFilterLibAudioProcessorEditor(AudioFilt
     addAndMakeVisible(designMethodBox);
     setUpLabel(designMethodLabel, *this);
     designMethodAttachment = std::make_unique<ComboAttachment>(
-        processor.apvts, AudioFilterLibAudioProcessor::designMethodParamId, designMethodBox);
+        audioProcessor.apvts, AudioFilterLibAudioProcessor::designMethodParamId, designMethodBox);
     designMethodBox.onChange = [this] { updateEnablement(); };
 
     // --- Order ---
@@ -53,7 +53,7 @@ AudioFilterLibAudioProcessorEditor::AudioFilterLibAudioProcessorEditor(AudioFilt
     addAndMakeVisible(orderBox);
     setUpLabel(orderLabel, *this);
     orderAttachment = std::make_unique<ComboAttachment>(
-        processor.apvts, AudioFilterLibAudioProcessor::orderParamId, orderBox);
+        audioProcessor.apvts, AudioFilterLibAudioProcessor::orderParamId, orderBox);
 
     // --- Frequency / bandwidth / ripple rotary sliders ---
     for (auto* slider : { &frequencySlider, &bandwidthSlider, &rippleSlider })
@@ -66,16 +66,16 @@ AudioFilterLibAudioProcessorEditor::AudioFilterLibAudioProcessorEditor(AudioFilt
     setUpLabel(bandwidthLabel, *this);
     setUpLabel(rippleLabel, *this);
 
-    matchSliderRangeToParameter(frequencySlider, processor.apvts, AudioFilterLibAudioProcessor::frequencyParamId);
-    matchSliderRangeToParameter(bandwidthSlider, processor.apvts, AudioFilterLibAudioProcessor::bandwidthParamId);
-    matchSliderRangeToParameter(rippleSlider, processor.apvts, AudioFilterLibAudioProcessor::rippleParamId);
+    matchSliderRangeToParameter(frequencySlider, audioProcessor.apvts, AudioFilterLibAudioProcessor::frequencyParamId);
+    matchSliderRangeToParameter(bandwidthSlider, audioProcessor.apvts, AudioFilterLibAudioProcessor::bandwidthParamId);
+    matchSliderRangeToParameter(rippleSlider, audioProcessor.apvts, AudioFilterLibAudioProcessor::rippleParamId);
 
     frequencyAttachment = std::make_unique<SliderAttachment>(
-        processor.apvts, AudioFilterLibAudioProcessor::frequencyParamId, frequencySlider);
+        audioProcessor.apvts, AudioFilterLibAudioProcessor::frequencyParamId, frequencySlider);
     bandwidthAttachment = std::make_unique<SliderAttachment>(
-        processor.apvts, AudioFilterLibAudioProcessor::bandwidthParamId, bandwidthSlider);
+        audioProcessor.apvts, AudioFilterLibAudioProcessor::bandwidthParamId, bandwidthSlider);
     rippleAttachment = std::make_unique<SliderAttachment>(
-        processor.apvts, AudioFilterLibAudioProcessor::rippleParamId, rippleSlider);
+        audioProcessor.apvts, AudioFilterLibAudioProcessor::rippleParamId, rippleSlider);
 
     updateEnablement();
     setSize(520, 320);
