@@ -51,6 +51,11 @@ cmake -DCMAKE_BUILD_TYPE=Release ..
 cmake --build . -j$(nproc)
 ```
 
+> The core library and its `git clone` above need no submodules. The
+> optional [JUCE demo plugin](plugin/README.md) lives in `extern/JUCE` as a
+> git submodule and only needs cloning if you turn on `-DENABLE_JUCE_DEMO=ON`
+> (see [Building from Source](#building-from-source)).
+
 ### Run Example
 
 ```bash
@@ -234,6 +239,18 @@ cmake --build . --config Release -j$(nproc)
 cmake -DCMAKE_TOOLCHAIN_FILE=[vcpkg_root]/scripts/buildsystems/vcpkg.cmake \
       -DENABLE_TESTS=ON ..
 cmake --build .
+```
+
+### JUCE Demo Plugin (optional)
+
+An optional VST3/AU/Standalone plugin that wraps the filters in a real
+JUCE `AudioProcessor` — see [plugin/README.md](plugin/README.md) for
+parameters, build targets, and known limitations.
+
+```bash
+git submodule update --init --recursive   # fetches extern/JUCE
+cmake -DENABLE_JUCE_DEMO=ON ..
+cmake --build . --target audiofilter_plugin -j$(nproc)
 ```
 
 ## Testing & Validation
