@@ -10,6 +10,22 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# === JUCE demo plugin (optional) ===
+# Pulled in here, before this file's own compiler-flag block below, so that
+# JUCE (and the plugin target) do NOT inherit AudioFilterLib's -march=native /
+# -ffast-math / -Wpedantic flags: add_subdirectory() captures the parent
+# directory's COMPILE_OPTIONS as they stand at the point it is called, not
+# retroactively. JUCE applies its own recommended flags per-target instead.
+option(ENABLE_JUCE_DEMO "Build the JUCE demo plugin (extern/JUCE submodule)" OFF)
+if(ENABLE_JUCE_DEMO)
+    if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/extern/JUCE/CMakeLists.txt")
+        message(FATAL_ERROR
+            "extern/JUCE is empty. Run: git submodule update --init --recursive")
+    endif()
+    add_subdirectory(extern/JUCE)
+    add_subdirectory(plugin)
+endif()
+
 # Compiler warnings
 if(MSVC)
     add_compile_options(/W4)
@@ -128,3 +144,4 @@ message(STATUS "  Enable Tests: ${ENABLE_TESTS}")
 message(STATUS "  Enable Examples: ${ENABLE_EXAMPLES}")
 message(STATUS "  Enable SIMD: ${ENABLE_SIMD}")
 message(STATUS "  Enable LTO: ${ENABLE_LTO}")
+message(STATUS "  Enable JUCE Demo: ${ENABLE_JUCE_DEMO}")
