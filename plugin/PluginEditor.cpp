@@ -107,7 +107,7 @@ void AudioFilterLibAudioProcessorEditor::resized()
 
     auto comboRow = area.removeFromTop(56);
     const int comboWidth = comboRow.getWidth() / 3;
-    for (auto* pair : { std::pair { &filterTypeLabel, &filterTypeBox },
+    for (auto pair : { std::pair { &filterTypeLabel, &filterTypeBox },
                          std::pair { &designMethodLabel, &designMethodBox },
                          std::pair { &orderLabel, &orderBox } })
     {
