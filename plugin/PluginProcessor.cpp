@@ -1,6 +1,8 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
+#include <iterator>
+
 using namespace audiofilter;
 
 namespace
@@ -105,21 +107,32 @@ std::vector<FilterPtr> AudioFilterLibAudioProcessor::designChain(
     }
 }
 
+bool AudioFilterLibAudioProcessor::parametersHaveChanged() const
+{
+    return lastBuilt.filterTypeIndex != (int) apvts.getRawParameterValue(filterTypeParamId)->load()
+        || lastBuilt.designMethodIndex != (int) apvts.getRawParameterValue(designMethodParamId)->load()
+        || lastBuilt.frequency != apvts.getRawParameterValue(frequencyParamId)->load()
+        || lastBuilt.bandwidth != apvts.getRawParameterValue(bandwidthParamId)->load()
+        || lastBuilt.orderIndex != (int) apvts.getRawParameterValue(orderParamId)->load()
+        || lastBuilt.rippleDb != apvts.getRawParameterValue(rippleParamId)->load()
+        || lastBuilt.sampleRate != currentSampleRate;
+}
+
 void AudioFilterLibAudioProcessor::rebuildFilters()
 {
     const auto sr = (uint32_t) juce::jlimit(8000.0, 192000.0, currentSampleRate);
     const auto numChannels = (size_t) juce::jmax(1, getTotalNumOutputChannels());
 
-    const auto typeIndex = (size_t) apvts.getRawParameterValue(filterTypeParamId)->load();
-    const auto methodIndex = (size_t) apvts.getRawParameterValue(designMethodParamId)->load();
+    const auto typeIndex = (int) apvts.getRawParameterValue(filterTypeParamId)->load();
+    const auto methodIndex = (int) apvts.getRawParameterValue(designMethodParamId)->load();
     const auto frequency = apvts.getRawParameterValue(frequencyParamId)->load();
     const auto bandwidth = apvts.getRawParameterValue(bandwidthParamId)->load();
-    const auto orderIndex = (size_t) apvts.getRawParameterValue(orderParamId)->load();
+    const auto orderIndex = (int) apvts.getRawParameterValue(orderParamId)->load();
     const auto rippleDb = apvts.getRawParameterValue(rippleParamId)->load();
 
-    const auto type = kFilterTypes[juce::jmin(typeIndex, std::size(kFilterTypes) - 1)];
-    const auto method = kDesignMethods[juce::jmin(methodIndex, std::size(kDesignMethods) - 1)];
-    const auto order = kOrders[juce::jmin(orderIndex, std::size(kOrders) - 1)];
+    const auto type = kFilterTypes[juce::jlimit(0, (int) std::size(kFilterTypes) - 1, typeIndex)];
+    const auto method = kDesignMethods[juce::jlimit(0, (int) std::size(kDesignMethods) - 1, methodIndex)];
+    const auto order = kOrders[juce::jlimit(0, (int) std::size(kOrders) - 1, orderIndex)];
 
     // Clamp center/cutoff so it can't cross Nyquist as sample rate changes.
     const float safeFrequency = juce::jmin(frequency, (float) sr * 0.45f);
@@ -133,13 +146,15 @@ void AudioFilterLibAudioProcessor::rebuildFilters()
         for (auto& biquad : chain)
             biquad->configure(sr, 1);
     }
+
+    lastBuilt = { typeIndex, methodIndex, frequency, bandwidth, orderIndex, rippleDb, currentSampleRate };
 }
 
 void AudioFilterLibAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer&)
 {
     juce::ScopedNoDenormals noDenormals;
 
-    if (parametersChanged.exchange(false))
+    if (parametersHaveChanged())
         rebuildFilters();
 
     const auto numSamples = (size_t) buffer.getNumSamples();
@@ -170,7 +185,7 @@ void AudioFilterLibAudioProcessor::setStateInformation(const void* data, int siz
         if (xml->hasTagName(apvts.state.getType()))
             apvts.replaceState(juce::ValueTree::fromXml(*xml));
 
-    parametersChanged = true;
+    lastBuilt.sampleRate = -1.0;  // force a rebuild on the next processBlock()
 }
 
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
