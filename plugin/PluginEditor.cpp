@@ -25,7 +25,7 @@ namespace
 }
 
 AudioFilterLibAudioProcessorEditor::AudioFilterLibAudioProcessorEditor(AudioFilterLibAudioProcessor& p)
-    : AudioProcessorEditor(&p), processor(p)
+    : AudioProcessorEditor(&p), audioProcessor(p)
 {
     titleLabel.setText("AudioFilterLib Demo", juce::dontSendNotification);
     titleLabel.setJustificationType(juce::Justification::centred);
@@ -120,7 +120,7 @@ void AudioFilterLibAudioProcessorEditor::resized()
 
     auto knobRow = area.removeFromTop(140);
     const int knobWidth = knobRow.getWidth() / 3;
-    for (auto* pair : { std::pair { &frequencyLabel, &frequencySlider },
+    for (auto pair : { std::pair { &frequencyLabel, &frequencySlider },
                          std::pair { &bandwidthLabel, &bandwidthSlider },
                          std::pair { &rippleLabel, &rippleSlider } })
     {

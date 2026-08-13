@@ -26,7 +26,9 @@ public:
 private:
     void updateEnablement();
 
-    AudioFilterLibAudioProcessor& processor;
+    // Named audioProcessor (not processor) to avoid shadowing
+    // AudioProcessorEditor::processor (same reference, base class' type).
+    AudioFilterLibAudioProcessor& audioProcessor;
 
     juce::Label titleLabel;
 
