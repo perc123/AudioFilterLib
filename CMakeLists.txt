@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 project(AudioFilterLib
     VERSION 0.1.0
     DESCRIPTION "High-performance C++ audio filter library (IIR & FIR)"
-    LANGUAGES CXX
+    LANGUAGES CXX C   # C is only needed for the optional JUCE demo (extern/JUCE requires it)
 )
 
 # C++ Standard
